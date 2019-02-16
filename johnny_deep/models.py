@@ -1,6 +1,6 @@
 import numpy as np
 
-from .activations import sigmoid
+from .activations import sigmoid, sigmoid_backward
 
 class Model():
     def __init__(self, architecture: list):
@@ -78,5 +78,62 @@ class Model():
             self.memory["A" + str(layer_idx)] = A_prev
             self.memory["Z" + str(layer_idx)] = Z_curr
 
-        # return of prediction vector
-        return A_curr
+        # for consistency and for making the back-propagation loop
+        # easier to read, the activations of layer 0 (a.k.a. X)
+        # have to be stored into memory
+        self.memory["A" + str(0)] = X
+
+        # saving current prediction vector as Y_hat
+        # for future back_propagation but also it's
+        # the function return value when used for inference
+        self.Y_hat = A_curr
+
+        # return Y_hat
+        return self.Y_hat
+
+    def back_propagation(self, Y):
+        self.grads_values = {}
+
+        # a hack ensuring the same shape of the prediction vector and labels vector
+        Y = Y.reshape(self.Y_hat.shape)
+
+        # number of examples
+        m = Y.shape[1]
+
+        # initiation of gradient descent algorithm: derivative of log_loss
+        dA_prev = - (np.divide(Y, self.Y_hat) - np.divide(1 - Y, 1 - self.Y_hat));
+
+        for layer_idx in range(len(self.architecture)-1, 0, -1):
+            # that's the current layer
+            layer = self.architecture[layer_idx]
+
+            dA_curr = dA_prev
+
+            A_prev = self.memory["A" + str(layer_idx-1)]
+            Z_curr = self.memory["Z" + str(layer_idx)]
+
+            W_curr = self.params_values["W" + str(layer_idx)]
+            b_curr = self.params_values["b" + str(layer_idx)]
+
+            # number of examples
+            m = A_prev.shape[1]
+
+            # selection of activation function
+            if layer["type"] is "linear":
+                dZ_curr = dA_curr
+            elif layer["type"] is "sigmoid":
+                dZ_curr = sigmoid_backward(dA_curr, Z_curr)
+            else:
+                raise Exception('Non-supported activation function')
+
+            # derivative of the matrix W
+            dW_curr = np.dot(dZ_curr, A_prev.T) / m
+            # derivative of the vector b
+            db_curr = np.sum(dZ_curr, axis=1, keepdims=True) / m
+            # derivative of the matrix A_prev
+            dA_prev = np.dot(W_curr.T, dZ_curr)
+
+
+            self.grads_values["dW" + str(layer_idx)] = dW_curr
+            self.grads_values["db" + str(layer_idx)] = db_curr
+

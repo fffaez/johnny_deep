@@ -14,5 +14,10 @@ nn_architecture = [
 ]
 
 m = johnny_deep.models.Model(nn_architecture)
-Y_hat = m.forward(X)
-m.back_propagation(Y)
+
+for ix in range(10000):
+    Y_hat = m.forward(X)
+    cost = johnny_deep.utils.get_cost_value(Y_hat, Y)
+    print("Epoch {} - cost {}".format(ix+1, cost))
+    m.back_propagation(Y)
+    m.optimization_step(0.1)

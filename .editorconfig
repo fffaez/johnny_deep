@@ -1,6 +1,7 @@
 # EditorConfig is awesome: http://EditorConfig.org
 # Make sure that your IDE / Editor supports that or install it as a plugin
 
+
 root = true
 
 [*]

@@ -1,5 +1,7 @@
 import numpy as np
 
+from .activations import sigmoid
+
 class Model():
     def __init__(self, architecture: list):
         if len(architecture) < 1 and architecture[0]['type'] != 'input':
@@ -67,6 +69,8 @@ class Model():
             # selection of activation function
             if layer["type"] is "linear":
                 A_curr, Z_curr = Z_curr, Z_curr
+            elif layer["type"] is "sigmoid":
+                A_curr, Z_curr = sigmoid(Z_curr), Z_curr
             else:
                 raise Exception('Non-supported activation function')
 

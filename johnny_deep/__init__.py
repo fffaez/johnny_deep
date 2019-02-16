@@ -2,6 +2,7 @@
 
 __version__ = '0.0.1'
 __author__ = 'Marco Faedo <marcofaedo@gmail.com>'
-__all__ = ['models']
+__all__ = ['models', 'activations']
 
 from . import models
+from . import activations

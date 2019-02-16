@@ -75,13 +75,8 @@ class Model():
                 raise Exception('Non-supported activation function')
 
             # saving calculated values in the memory
-            self.memory["A" + str(layer_idx)] = A_prev
+            self.memory["A" + str(layer_idx-1)] = A_prev
             self.memory["Z" + str(layer_idx)] = Z_curr
-
-        # for consistency and for making the back-propagation loop
-        # easier to read, the activations of layer 0 (a.k.a. X)
-        # have to be stored into memory
-        self.memory["A" + str(0)] = X
 
         # saving current prediction vector as Y_hat
         # for future back_propagation but also it's
@@ -137,3 +132,9 @@ class Model():
             self.grads_values["dW" + str(layer_idx)] = dW_curr
             self.grads_values["db" + str(layer_idx)] = db_curr
 
+    def optimization_step(self, learning_rate):
+
+        # iteration over network layers
+        for layer_idx in range(1, len(self.architecture)):
+            self.params_values["W" + str(layer_idx)] -= learning_rate * self.grads_values["dW" + str(layer_idx)]
+            self.params_values["b" + str(layer_idx)] -= learning_rate * self.grads_values["db" + str(layer_idx)]

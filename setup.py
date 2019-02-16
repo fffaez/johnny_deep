@@ -27,7 +27,7 @@ setup(
 
     packages=find_packages(exclude=('tests',)),
 
-    install_requires=['numpy>=1.15.4'],
+    install_requires=['numpy>=1.15.4', 'sklearn'],
 
     extras_require={
           'development': ['pytest'],

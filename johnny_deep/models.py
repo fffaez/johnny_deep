@@ -1,6 +1,7 @@
 import numpy as np
 
 from .activations import sigmoid, sigmoid_backward
+from .activations import relu, relu_backward
 
 class Model():
     def __init__(self, architecture: list):
@@ -71,6 +72,8 @@ class Model():
                 A_curr, Z_curr = Z_curr, Z_curr
             elif layer["type"] is "sigmoid":
                 A_curr, Z_curr = sigmoid(Z_curr), Z_curr
+            elif layer["type"] is "relu":
+                A_curr, Z_curr = relu(Z_curr), Z_curr
             else:
                 raise Exception('Non-supported activation function')
 
@@ -118,6 +121,8 @@ class Model():
                 dZ_curr = dA_curr
             elif layer["type"] is "sigmoid":
                 dZ_curr = sigmoid_backward(dA_curr, Z_curr)
+            elif layer["type"] is "relu":
+                dZ_curr = relu_backward(dA_curr, Z_curr)
             else:
                 raise Exception('Non-supported activation function')
 

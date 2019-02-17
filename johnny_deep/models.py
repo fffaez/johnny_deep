@@ -163,29 +163,5 @@ class Model():
         raise Exception("Not implemented")
 
     def fit(self, X, Y, no_epochs, learning_rate, mini_batch_size=32, print_every=100):
-        for ix in range(no_epochs):
-            epoch_cost = 0
-            # Workshop #7: implement momentum
-            # self.reset_momentum()
-            for minibatch_ix in range(0, X.shape[1], mini_batch_size):
-                X_train = X[:, minibatch_ix : minibatch_ix + mini_batch_size]
-
-                if X_train.shape[1] == 0:
-                    break
-
-                Y_hat = self.forward(X_train)
-
-                Y_train = Y[minibatch_ix : minibatch_ix + mini_batch_size]
-                self.back_propagation(Y_train)
-
-                # Workshop #7: implement momentum
-                # self.optimization_step_momentum(learning_rate)
-                self.optimization_step(learning_rate)
-
-                mini_batch_cost = get_cost_value(Y_hat, Y_train) * X_train.shape[1]
-                epoch_cost += mini_batch_cost
-
-            epoch_cost = epoch_cost / X.shape[1]
-            epoch_no = ix+1
-            if epoch_no % print_every == 0:
-                print("Epoch {} - cost {}".format(epoch_no, epoch_cost))
+        # WORKSHOP #6
+        raise Exception("Not implemented")

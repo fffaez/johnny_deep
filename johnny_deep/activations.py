@@ -11,10 +11,10 @@ def sigmoid_backward(dA, Z):
 
 
 def relu(Z):
-    return np.maximum(0,Z)
+    # WORKSHOP #5: code the ReLU activation function
+    raise Exception("Not implemented")
 
 
 def relu_backward(dA, Z):
-    dZ = np.array(dA, copy = True)
-    dZ[Z <= 0] = 0;
-    return dZ;
+    # WORKSHOP #5: code the ReLU activation function
+    raise Exception("Not implemented")

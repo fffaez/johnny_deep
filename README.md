@@ -12,4 +12,4 @@ pip install -e ".[development]"
 
 ## Authors
 
-`johnny_deep` was written by `Marco Faedo <marcofaedo@gmail.com>`_.
+`johnny_deep` was written by `Marco Faedo <marcofaedo@gmail.com>`.

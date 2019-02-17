@@ -66,19 +66,10 @@ class Model():
             # extraction of b for the current layer
             b_curr = self.params_values["b" + str(layer_idx)]
 
-            # calculation of activation for the current layer
-            Z_curr = np.dot(W_curr, A_prev) + b_curr
-
-            # selection of activation function
-            layer_type = self.architecture[layer_idx]["type"]
-            if layer_type is "linear":
-                A_curr, Z_curr = Z_curr, Z_curr
-            elif layer_type is "sigmoid":
-                A_curr, Z_curr = sigmoid(Z_curr), Z_curr
-            elif layer_type is "relu":
-                A_curr, Z_curr = relu(Z_curr), Z_curr
-            else:
-                raise Exception('Non-supported activation function')
+            # Workshop #1: implement back-propagation
+            # just apply the formulas with the parameters W_curr and b_curr
+            # you need to store a variable called Z_curr for posterity (will be clearer later)
+            # and A_curr which is needed in the next iteration of the loop and as a return value
 
             # saving calculated values in the memory
             self.memory["A" + str(layer_idx-1)] = A_prev

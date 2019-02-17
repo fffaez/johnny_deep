@@ -130,6 +130,7 @@ class Model():
 
     def optimization_step(self, learning_rate):
         # Workshop #2: implement vanilla gradient descent step
+        # Hint: you need grads_values and params_values...
         raise Exception("Not implemented")
         for layer_idx in range(1, len(self.architecture)):
             pass

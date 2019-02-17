@@ -123,36 +123,25 @@ class Model():
             # number of examples
             m = A_prev.shape[1]
 
-            # selection of activation function
-            layer_type = self.architecture[layer_idx]["type"]
-            if layer_type is "linear":
-                dZ_curr = dA_curr
-            elif layer_type is "sigmoid":
-                dZ_curr = sigmoid_backward(dA_curr, Z_curr)
-            elif layer_type is "relu":
-                dZ_curr = relu_backward(dA_curr, Z_curr)
-            else:
-                raise Exception('Non-supported activation function')
-
-            # derivative of the matrix W
-            dW_curr = np.dot(dZ_curr, A_prev.T) / m
-            # derivative of the vector b
-            db_curr = np.sum(dZ_curr, axis=1, keepdims=True) / m
-            # derivative of the matrix A_prev
-            dA_prev = np.dot(W_curr.T, dZ_curr)
-
+            # Workshop #3: implement back-propagation
+            # some suggestions:
+            # dA_curr is already computed correctly
+            # dZ_curr depends on the activation function aka layer type
+            # dW_curr is just like the formula
+            # db_curr is just like the formula, but pay extra care on
+            # the dimensions of numpy array
+            # call dA[l-1] as dA_prev, the assignment at the beginning of the loop
+            # will do the rest
+            raise Exception("Not implemented")
 
             self.grads_values["dW" + str(layer_idx)] = dW_curr
             self.grads_values["db" + str(layer_idx)] = db_curr
 
     def optimization_step(self, learning_rate):
-        # that's a implementation of vanilla gradient descent
-        # here's the place where we should consider implementing other
-        # state of the art heuristics like momentum, RMSProp and Adam
-        # https://blog.paperspace.com/intro-to-optimization-momentum-rmsprop-adam/
+        # Workshop #2: implement vanilla gradient descent step
+        raise Exception("Not implemented")
         for layer_idx in range(1, len(self.architecture)):
-            self.params_values["W" + str(layer_idx)] -= learning_rate * self.grads_values["dW" + str(layer_idx)]
-            self.params_values["b" + str(layer_idx)] -= learning_rate * self.grads_values["db" + str(layer_idx)]
+            pass
 
     def reset_momentum(self):
         # Workshop #7: implement momentum

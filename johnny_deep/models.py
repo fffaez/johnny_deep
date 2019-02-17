@@ -3,6 +3,8 @@ import numpy as np
 from .activations import sigmoid, sigmoid_backward
 from .activations import relu, relu_backward
 
+from .utils import get_cost_value
+
 class Model():
     def __init__(self, architecture):
         if len(architecture) < 1 and architecture[0]['type'] != 'input':
@@ -49,7 +51,7 @@ class Model():
     def forward(self, X):
         # creating a temporary memory to store the information needed for a backward step
         self.memory = {}
-        # X vector is the activation for layer 0 
+        # X vector is the activation for layer 0
         A_curr = X
 
         # iteration over network layers
@@ -149,3 +151,27 @@ class Model():
         for layer_idx in range(1, len(self.architecture)):
             self.params_values["W" + str(layer_idx)] -= learning_rate * self.grads_values["dW" + str(layer_idx)]
             self.params_values["b" + str(layer_idx)] -= learning_rate * self.grads_values["db" + str(layer_idx)]
+
+    def fit(self, X, Y, no_epochs, learning_rate, mini_batch_size=32, print_every=100):
+        for ix in range(no_epochs):
+            epoch_cost = 0
+            for minibatch_ix in range(0, X.shape[1], mini_batch_size):
+                X_train = X[:, minibatch_ix : minibatch_ix + mini_batch_size]
+
+                if X_train.shape[1] == 0:
+                    break
+
+                Y_hat = self.forward(X_train)
+
+                Y_train = Y[minibatch_ix : minibatch_ix + mini_batch_size]
+                self.back_propagation(Y_train)
+
+                self.optimization_step(0.1)
+
+                mini_batch_cost = get_cost_value(Y_hat, Y_train) * X_train.shape[1]
+                epoch_cost += mini_batch_cost
+
+            epoch_cost = epoch_cost / X.shape[1]
+            epoch_no = ix+1
+            if epoch_no % print_every == 0:
+                print("Epoch {} - cost {}".format(epoch_no, epoch_cost))

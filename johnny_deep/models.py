@@ -3,7 +3,7 @@ import numpy as np
 from .activations import sigmoid, sigmoid_backward
 
 class Model():
-    def __init__(self, architecture: list):
+    def __init__(self, architecture):
         if len(architecture) < 1 and architecture[0]['type'] != 'input':
             raise Exception("Model architecture must be deeper than one layer and first layer type must be input")
         self.architecture = architecture
@@ -21,19 +21,20 @@ class Model():
 
         # iteration over network layers
         for layer_idx in range(1, len(self.architecture)):
-            # dimension of previous layer is the input dimension
-            layer_previous = self.architecture[layer_idx-1]
-            # that's the current layer
-            layer = self.architecture[layer_idx]
-
             # extracting the number of units in layers
-            layer_input_size = layer_previous["dimension"]
-            layer_output_size = layer["dimension"]
+            # input size from the previous layer:
+            layer_input_size = self.architecture[layer_idx-1]["dimension"]
+            # output size from the current layer:
+            layer_output_size = self.architecture[layer_idx]["dimension"]
 
             # initiating the values of the W matrix
-            # and vector b for subsequent layers
+            # randomness is important here: otherwise all neurons will learn in the same way
+            # try to tweak the random factor, make it a parameter or google for some other heuristics
+            # as described here: https://medium.com/usf-msds/deep-learning-best-practices-1-weight-initialization-14e5c0295b94
             self.params_values['W' + str(layer_idx)] = \
                 np.random.randn(layer_output_size, layer_input_size) * 0.1
+            # initiating the values of b
+            # this can be either all zero or random
             self.params_values['b' + str(layer_idx)] = \
                 np.zeros((layer_output_size, 1))
 
@@ -52,9 +53,6 @@ class Model():
 
         # iteration over network layers
         for layer_idx in range(1, len(self.architecture)):
-            # that's the current layer
-            layer = self.architecture[layer_idx]
-
             # transfer the activation from the previous iteration
             A_prev = A_curr
 
@@ -67,9 +65,10 @@ class Model():
             Z_curr = np.dot(W_curr, A_prev) + b_curr
 
             # selection of activation function
-            if layer["type"] is "linear":
+            layer_type = self.architecture[layer_idx]["type"]
+            if layer_type is "linear":
                 A_curr, Z_curr = Z_curr, Z_curr
-            elif layer["type"] is "sigmoid":
+            elif layer_type is "sigmoid":
                 A_curr, Z_curr = sigmoid(Z_curr), Z_curr
             else:
                 raise Exception('Non-supported activation function')
@@ -89,21 +88,25 @@ class Model():
     def back_propagation(self, Y):
         self.grads_values = {}
 
-        # a hack ensuring the same shape of the prediction vector and labels vector
+        # Y_hat has the shape of (ouput_dim, no_examples)
+        # because we do binary classification only Y might have the
+        # shape of (no_sample), so a reshape of Y is needed here
         Y = Y.reshape(self.Y_hat.shape)
 
         # number of examples
         m = Y.shape[1]
 
-        # initiation of gradient descent algorithm: derivative of log_loss
+        # initiation of gradient descent algorithm
+        # hardcoded derivative of log_loss wrt Y_hat
+        # which is the input of backpropagation algorithm
         dA_prev = - (np.divide(Y, self.Y_hat) - np.divide(1 - Y, 1 - self.Y_hat));
 
+        # back-propagation algorithm requires that we iterate over layer backwards...
         for layer_idx in range(len(self.architecture)-1, 0, -1):
-            # that's the current layer
-            layer = self.architecture[layer_idx]
-
             dA_curr = dA_prev
 
+            # let's grab value of activations and Z of the previous layer
+            # that we stored while the forward step...
             A_prev = self.memory["A" + str(layer_idx-1)]
             Z_curr = self.memory["Z" + str(layer_idx)]
 
@@ -114,9 +117,10 @@ class Model():
             m = A_prev.shape[1]
 
             # selection of activation function
-            if layer["type"] is "linear":
+            layer_type = self.architecture[layer_idx]["type"]
+            if layer_type is "linear":
                 dZ_curr = dA_curr
-            elif layer["type"] is "sigmoid":
+            elif layer_type is "sigmoid":
                 dZ_curr = sigmoid_backward(dA_curr, Z_curr)
             else:
                 raise Exception('Non-supported activation function')
@@ -133,8 +137,10 @@ class Model():
             self.grads_values["db" + str(layer_idx)] = db_curr
 
     def optimization_step(self, learning_rate):
-
-        # iteration over network layers
+        # that's a implementation of vanilla gradient descent
+        # here's the place where we should consider implementing other
+        # state of the art heuristics like momentum, RMSProp and Adam
+        # https://blog.paperspace.com/intro-to-optimization-momentum-rmsprop-adam/
         for layer_idx in range(1, len(self.architecture)):
             self.params_values["W" + str(layer_idx)] -= learning_rate * self.grads_values["dW" + str(layer_idx)]
             self.params_values["b" + str(layer_idx)] -= learning_rate * self.grads_values["db" + str(layer_idx)]

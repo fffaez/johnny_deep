@@ -12,6 +12,7 @@ class Model():
         self.architecture = architecture
         # let's initialize layers at first...
         self.init_layers()
+        self.reset_momentum()
 
 
     def init_layers(self, seed=42):
@@ -152,9 +153,24 @@ class Model():
             self.params_values["W" + str(layer_idx)] -= learning_rate * self.grads_values["dW" + str(layer_idx)]
             self.params_values["b" + str(layer_idx)] -= learning_rate * self.grads_values["db" + str(layer_idx)]
 
+    def reset_momentum(self):
+        self.velocity = {}
+        for layer_idx in range(1, len(self.architecture)):
+            self.velocity["dW" + str(layer_idx)] = np.zeros_like(self.params_values["W" + str(layer_idx)])
+            self.velocity["db" + str(layer_idx)] = np.zeros_like(self.params_values["b" + str(layer_idx)])
+
+    def optimization_step_momentum(self, learning_rate, decay_rate=0.9):
+        for layer_idx in range(1, len(self.architecture)):
+            self.velocity["dW" + str(layer_idx)] = decay_rate * self.velocity["dW" + str(layer_idx)] + (1-decay_rate) * self.grads_values["dW" + str(layer_idx)]
+            self.velocity["db" + str(layer_idx)] = decay_rate * self.velocity["db" + str(layer_idx)] + (1-decay_rate) * self.grads_values["db" + str(layer_idx)]
+
+            self.params_values["W" + str(layer_idx)] -= learning_rate * self.velocity["dW" + str(layer_idx)]
+            self.params_values["b" + str(layer_idx)] -= learning_rate * self.velocity["db" + str(layer_idx)]
+
     def fit(self, X, Y, no_epochs, learning_rate, mini_batch_size=32, print_every=100):
         for ix in range(no_epochs):
             epoch_cost = 0
+            self.reset_momentum()
             for minibatch_ix in range(0, X.shape[1], mini_batch_size):
                 X_train = X[:, minibatch_ix : minibatch_ix + mini_batch_size]
 
@@ -166,7 +182,7 @@ class Model():
                 Y_train = Y[minibatch_ix : minibatch_ix + mini_batch_size]
                 self.back_propagation(Y_train)
 
-                self.optimization_step(0.1)
+                self.optimization_step_momentum(learning_rate)
 
                 mini_batch_cost = get_cost_value(Y_hat, Y_train) * X_train.shape[1]
                 epoch_cost += mini_batch_cost

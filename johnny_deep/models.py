@@ -170,7 +170,6 @@ class Model():
     def fit(self, X, Y, no_epochs, learning_rate, mini_batch_size=32, print_every=100):
         for ix in range(no_epochs):
             epoch_cost = 0
-            self.reset_momentum()
             for minibatch_ix in range(0, X.shape[1], mini_batch_size):
                 X_train = X[:, minibatch_ix : minibatch_ix + mini_batch_size]
 

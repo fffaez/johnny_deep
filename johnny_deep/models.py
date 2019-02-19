@@ -5,6 +5,8 @@ from .activations import relu, relu_backward
 
 from .utils import get_cost_value
 
+import pdb
+
 class Model():
     def __init__(self, architecture):
         if len(architecture) < 1 and architecture[0]['type'] != 'input':
@@ -13,6 +15,7 @@ class Model():
         # let's initialize layers at first...
         self.init_layers()
         self.reset_momentum()
+        self.dropout = {}
 
 
     def init_layers(self, seed=42):
@@ -49,7 +52,7 @@ class Model():
             print("W shape: {}".format(self.params_values['W' + str(layer_idx)].shape))
             print("b shape: {}".format(self.params_values['b' + str(layer_idx)].shape))
 
-    def forward(self, X):
+    def forward(self, X, inference=True):
         # creating a temporary memory to store the information needed for a backward step
         self.memory = {}
         # X vector is the activation for layer 0
@@ -69,7 +72,8 @@ class Model():
             Z_curr = np.dot(W_curr, A_prev) + b_curr
 
             # selection of activation function
-            layer_type = self.architecture[layer_idx]["type"]
+            current_layer = self.architecture[layer_idx]
+            layer_type = current_layer["type"]
             if layer_type is "linear":
                 A_curr, Z_curr = Z_curr, Z_curr
             elif layer_type is "sigmoid":
@@ -78,6 +82,15 @@ class Model():
                 A_curr, Z_curr = relu(Z_curr), Z_curr
             else:
                 raise Exception('Non-supported activation function')
+
+            # pdb.set_trace()
+
+            if not inference and "dropout" in current_layer:
+                keep_prob = 1 - current_layer["dropout"]
+                dropout_mask = np.random.rand(*A_curr.shape) < keep_prob
+                A_curr = A_curr * dropout_mask
+                A_curr = A_curr / keep_prob
+                self.dropout["dropout_mask" + str(layer_idx-1)] = dropout_mask
 
             # saving calculated values in the memory
             self.memory["A" + str(layer_idx-1)] = A_prev
@@ -176,7 +189,7 @@ class Model():
                 if X_train.shape[1] == 0:
                     break
 
-                Y_hat = self.forward(X_train)
+                Y_hat = self.forward(X_train, inference=False)
 
                 Y_train = Y[minibatch_ix : minibatch_ix + mini_batch_size]
                 self.back_propagation(Y_train)

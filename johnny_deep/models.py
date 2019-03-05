@@ -15,7 +15,6 @@ class Model():
         # Workshop #7: implement momentum
         # self.reset_momentum()
 
-
     def init_layers(self, seed=42):
         # random seed initiation
         np.random.seed(seed)
@@ -97,7 +96,7 @@ class Model():
         # initiation of gradient descent algorithm
         # hardcoded derivative of log_loss wrt Y_hat
         # which is the input of backpropagation algorithm
-        dA_prev = - (np.divide(Y, self.Y_hat) - np.divide(1 - Y, 1 - self.Y_hat));
+        dA_prev = - (np.divide(Y, self.Y_hat) - np.divide(1 - Y, 1 - self.Y_hat))
 
         # back-propagation algorithm requires that we iterate over layer backwards...
         for layer_idx in range(len(self.architecture)-1, 0, -1):

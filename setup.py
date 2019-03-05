@@ -27,10 +27,10 @@ setup(
 
     packages=find_packages(exclude=('tests',)),
 
-    install_requires=['numpy>=1.15.4', 'sklearn'],
+    install_requires=['numpy>=1.15.4', 'sklearn', 'jupyter', 'matplotlib'],
 
     extras_require={
-          'development': ['pytest'],
+          'development': ['pytest', 'flake8'],
     },
 
     classifiers=[

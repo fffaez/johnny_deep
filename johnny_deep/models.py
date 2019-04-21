@@ -38,17 +38,19 @@ class Model:
             b = theta["b" + str(layer_idx)]
             layer_type = self.architecture[layer_idx]['type']
 
+            # Workshop #1: implement forward pass
+            # it's just a simple linear equation to compute Z
             Z = W @ A_prev + b
-
+            # if the layer is linear, A is just equal to Z
             if layer_type == 'linear':
                 A = Z
-            elif layer_type == 'sigmoid':
-                A = 1 / (1 + np.exp(-Z))
-            elif layer_type == 'tanh':
-                A = np.tanh(Z)
-            elif layer_type == 'relu':
-                A = np.zeros_like(Z)
-                A[Z > 0] = Z[Z > 0]
+            # Workshop #1: END
+            # Workshop #2: Implement tanh, ReLU and sigmoid activation functions
+            # layer_type is always lowercase
+            # elif layer_type == 'sigmoid':
+            # elif layer_type == 'tanh':
+            # elif layer_type == 'relu':
+            # Workshop #2: END
 
             self.memory["A" + str(layer_idx)] = A
             self.memory["Z" + str(layer_idx)] = Z
@@ -76,22 +78,16 @@ class Model:
 
             layer_type = self.architecture[layer_idx]['type']
 
-            if layer_type == 'linear':
-                dZ_curr = dA_curr
-            elif layer_type == 'sigmoid':
-                dZ_curr = dA_curr * np.exp(-Z_curr) / (np.exp(-Z_curr) + 1)**2
-            elif layer_type == 'tanh':
-                dZ_curr = dA_curr * (1 - np.tanh(Z_curr)**2)
-            elif layer_type == 'relu':
-                dZ_curr = np.array(dA_curr, copy = True)
-                dZ_curr[Z_curr < 0] = 0
-
-            # derivative of the matrix W
-            dW_curr = 1/m * np.dot(dZ_curr, A_prev.T)
-            # derivative of the vector b
-            db_curr = 1/m * np.sum(dZ_curr, axis=1, keepdims=True)
-            # derivative of the matrix A_prev
-            dA_prev = np.dot(W_curr.T, dZ_curr)
+            # Workshop #6: implement back-propagation
+            # remember that we're looping layers backwards...
+            # compute in this order dZ_curr (which depends on the activation function of the layer)
+            # derivative wrt the matrix W: dW_curr
+            # derivative wrt the vector b: db_curr
+            # derivative wrt A_prev: dA_prev
+            # this last one is needed in the next iteration of the loop
+            # can be skipped if layer_idx = 1
+            # but let's compute it anyway to keep things simple
+            raise Exception('Not implemented yet')
 
             grads_values["W" + str(layer_idx)] = dW_curr
             grads_values["b" + str(layer_idx)] = db_curr
@@ -108,17 +104,15 @@ class Model:
 
         return cost
 
-    def fit(self, X_train, Y_train, optimizer, no_of_epochs, gradient_check_every, print_every):
+    def fit(self, X_train, Y_train, optimizer, no_of_epochs, print_every, gradient_check_every=None):
         theta = self.init_theta()
         cost = self.get_cost(X_train, Y_train)
         print("Epoch {}, cost: {}".format(0, cost(theta)))
         for epoch_no in range(1, no_of_epochs + 1):
-            theta_grad = self.backprop(theta, X_train, Y_train)
-            if gradient_check_every and epoch_no % gradient_check_every == 0:
-                theta_approx = gradient_approximation(theta, cost)
-                gradient_check_results = gradient_check(theta_grad, theta_approx)
-                print("Epoch {}, check: {}".format(epoch_no, all(gradient_check_results.values())))
-
+            # Workshop #5:
+            # compute theta_grad with the gradient_approximation function
+            # and the new theta by applying the optimizer step
+            theta_grad = gradient_approximation(theta, cost)
             theta = optimizer.step(theta, theta_grad)
 
             if print_every and epoch_no % print_every == 0:

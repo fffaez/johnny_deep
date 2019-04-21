@@ -1,62 +1,79 @@
 import numpy as np
+from .utils import gradient_approximation, gradient_check
 
-from .activations import sigmoid, sigmoid_backward
-from .activations import relu, relu_backward
 
-from .utils import get_cost_value
-
-class Model():
+class Model:
     def __init__(self, architecture):
-        if len(architecture) < 1 and architecture[0]['type'] != 'input':
-            raise Exception("Model architecture must be deeper than one layer and first layer type must be input")
         self.architecture = architecture
+<<<<<<< HEAD
+=======
         # let's initialize layers at first...
         self.init_layers()
         # Workshop #7: implement momentum
         # self.reset_momentum()
+>>>>>>> master
 
-    def init_layers(self, seed=42):
-        # random seed initiation
+    def init_theta(self, seed=42, verbose=True):
         np.random.seed(seed)
-        # number of layers in our neural network, input layer doesn't count
-        number_of_layers = len(self.architecture) - 1
-        # parameters storage initiation
-        self.params_values = {}
+        theta = {}
 
-        # iteration over network layers
         for layer_idx in range(1, len(self.architecture)):
-            # extracting the number of units in layers
-            # input size from the previous layer:
             layer_input_size = self.architecture[layer_idx-1]["dimension"]
-            # output size from the current layer:
             layer_output_size = self.architecture[layer_idx]["dimension"]
+            layer_type = self.architecture[layer_idx]['type']
 
-            # initiating the values of the W matrix
-            # randomness is important here: otherwise all neurons will learn in the same way
-            # try to tweak the random factor, make it a parameter or google for some other heuristics
-            # as described here: https://medium.com/usf-msds/deep-learning-best-practices-1-weight-initialization-14e5c0295b94
-            self.params_values['W' + str(layer_idx)] = \
+            theta['W' + str(layer_idx)] = \
                 np.random.randn(layer_output_size, layer_input_size) * 0.1
-            # initiating the values of b
-            # this can be either all zero or random
-            self.params_values['b' + str(layer_idx)] = \
+            theta['b' + str(layer_idx)] = \
                 np.zeros((layer_output_size, 1))
 
-    def model_info(self):
-        for layer_idx in range(1, len(self.architecture)):
-            layer = self.architecture[layer_idx]
-            print("Layer {}: {} with dimension {}".format(layer_idx, layer["type"], layer["dimension"]))
-            print("W shape: {}".format(self.params_values['W' + str(layer_idx)].shape))
-            print("b shape: {}".format(self.params_values['b' + str(layer_idx)].shape))
+            if verbose:
+                print("Layer {}: {} dimension {}".format(layer_idx, layer_type, self.architecture[layer_idx]["dimension"]))
+                print("W shape: {}".format(theta['W' + str(layer_idx)].shape))
+                print("b shape: {}".format(theta['b' + str(layer_idx)].shape))
 
-    def forward(self, X):
-        # creating a temporary memory to store the information needed for a backward step
+        return theta
+
+    def forward(self, theta, X):
         self.memory = {}
-        # X vector is the activation for layer 0
-        A_curr = X
+        A = X
+        self.memory["A" + str(0)] = X
 
-        # iteration over network layers
         for layer_idx in range(1, len(self.architecture)):
+<<<<<<< HEAD
+            A_prev = A
+            W = theta["W" + str(layer_idx)]
+            b = theta["b" + str(layer_idx)]
+            layer_type = self.architecture[layer_idx]['type']
+
+            Z = W @ A_prev + b
+
+            if layer_type == 'linear':
+                A = Z
+            elif layer_type == 'sigmoid':
+                A = 1 / (1 + np.exp(-Z))
+            elif layer_type == 'tanh':
+                A = np.tanh(Z)
+            elif layer_type == 'relu':
+                A = np.zeros_like(Z)
+                A[Z > 0] = Z[Z > 0]
+
+            self.memory["A" + str(layer_idx)] = A
+            self.memory["Z" + str(layer_idx)] = Z
+
+        return A
+
+
+    def backprop(self, theta, X, Y):
+        m = X.shape[1]
+        Y_hat = self.forward(theta, X)
+
+        grads_values = {}
+        for k, param in theta.items():
+            grads_values[k] = np.zeros_like(param)
+
+        dA_prev = - ((Y / Y_hat) - ((1 - Y) / (1 - Y_hat)))
+=======
             # transfer the activation from the previous iteration
             A_prev = A_curr
 
@@ -99,20 +116,69 @@ class Model():
         dA_prev = - (np.divide(Y, self.Y_hat) - np.divide(1 - Y, 1 - self.Y_hat))
 
         # back-propagation algorithm requires that we iterate over layer backwards...
+>>>>>>> master
         for layer_idx in range(len(self.architecture)-1, 0, -1):
             dA_curr = dA_prev
 
-            # let's grab value of activations and Z of the previous layer
-            # that we stored while the forward step...
             A_prev = self.memory["A" + str(layer_idx-1)]
             Z_curr = self.memory["Z" + str(layer_idx)]
 
-            W_curr = self.params_values["W" + str(layer_idx)]
-            b_curr = self.params_values["b" + str(layer_idx)]
+            W_curr = theta["W" + str(layer_idx)]
+            b_curr = theta["b" + str(layer_idx)]
 
-            # number of examples
-            m = A_prev.shape[1]
+            layer_type = self.architecture[layer_idx]['type']
 
+<<<<<<< HEAD
+            if layer_type == 'linear':
+                dZ_curr = dA_curr
+            elif layer_type == 'sigmoid':
+                dZ_curr = dA_curr * np.exp(-Z_curr) / (np.exp(-Z_curr) + 1)**2
+            elif layer_type == 'tanh':
+                dZ_curr = dA_curr * (1 - np.tanh(Z_curr)**2)
+            elif layer_type == 'relu':
+                dZ_curr = np.array(dA_curr, copy = True)
+                dZ_curr[Z_curr < 0] = 0
+
+            # derivative of the matrix W
+            dW_curr = 1/m * np.dot(dZ_curr, A_prev.T)
+            # derivative of the vector b
+            db_curr = 1/m * np.sum(dZ_curr, axis=1, keepdims=True)
+            # derivative of the matrix A_prev
+            dA_prev = np.dot(W_curr.T, dZ_curr)
+
+            grads_values["W" + str(layer_idx)] = dW_curr
+            grads_values["b" + str(layer_idx)] = db_curr
+
+        return grads_values
+
+
+    def get_cost(self, X, Y):
+        m = X.shape[1]
+
+        def cost(theta):
+            Y_hat = self.forward(theta, X)
+            return - 1/m * np.sum(Y * np.log(Y_hat) + (1-Y) * np.log(1-Y_hat))
+
+        return cost
+
+    def fit(self, X_train, Y_train, optimizer, no_of_epochs, gradient_check_every, print_every):
+        theta = self.init_theta()
+        cost = self.get_cost(X_train, Y_train)
+        print("Epoch {}, cost: {}".format(0, cost(theta)))
+        for epoch_no in range(1, no_of_epochs + 1):
+            theta_grad = self.backprop(theta, X_train, Y_train)
+            if gradient_check_every and epoch_no % gradient_check_every == 0:
+                theta_approx = gradient_approximation(theta, cost)
+                gradient_check_results = gradient_check(theta_grad, theta_approx)
+                print("Epoch {}, check: {}".format(epoch_no, all(gradient_check_results.values())))
+
+            theta = optimizer.step(theta, theta_grad)
+
+            if print_every and epoch_no % print_every == 0:
+                print("Epoch {}, cost: {}".format(epoch_no, cost(theta)))
+
+        return theta
+=======
             # Workshop #3: implement back-propagation
             # some suggestions:
             # dA_curr is already computed correctly
@@ -145,3 +211,4 @@ class Model():
     def fit(self, X, Y, no_epochs, learning_rate, mini_batch_size=32, print_every=100):
         # WORKSHOP #6
         raise Exception("Not implemented")
+>>>>>>> master

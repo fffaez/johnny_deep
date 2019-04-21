@@ -1,8 +1,15 @@
 # Johnny Deep
 
-A minimal framework for (not very) deep learning, created for education purposed only.
+A minimal framework for (not very) deep learning, created for education purpose only.
 
 ## Development install
+
+Create and activate a virtual environment (Python 3.5+ required):
+
+```sh
+python -m venv venv
+. ./venv/bin/activate
+```
 
 Fork and clone the repo locally, then install it as a package in editable mode:
 

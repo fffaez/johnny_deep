@@ -6,9 +6,9 @@ class GradientDescent:
 
     def step(self, theta, theta_grad):
         for k in theta_grad.keys():
-            # Workshop #3: implement the vanilla gradient descent step
-            # store the new value of theta in theta[k]...
-            raise Exception('Not implemented yet!')
-            # Workshop #3: END
+        #     # Workshop #3: implement the vanilla gradient descent step
+        #     # store the new value of theta in theta[k]...
+            theta[k] -= self.learning_rate * theta_grad[k]
+        #     # Workshop #3: END
         # don't forget to return theta!
         return theta

@@ -38,13 +38,9 @@ def gradient_approximation(theta, cost):
             theta_minus[k] = np.copy(param)
 
             # Workshop #4:
-            # remember that inside this loop
-            # k is the parameter matrix name i.e. 'W_1'
-            # idx is the index (tuple) inside such an array (thanks to ndenumerate)
-            # So you have to:
-            # add a tiny EPSILON to theta_plus
-            # substract a tiny EPSILON to theta_minus
-            # now you compute theta_grad[k][idx] as an approximation of the gradient
+            theta_plus[k][idx] += EPSILON
+            theta_minus[k][idx] -= EPSILON
+            theta_grad[k][idx] = (cost(theta_plus) - cost(theta_minus)) / (2 * EPSILON)
             # Workshop #4: END
 
             # let's not forget to copy the original parameter back into
@@ -56,6 +52,8 @@ def gradient_approximation(theta, cost):
 
 
 def gradient_check(theta_a, theta_b, threshold=EPSILON*10):
+    assert list(theta_a.keys()) == list(theta_b.keys())
+
     theta_check = {}
     for k in theta_a:
         theta_check[k] = theta_a[k] - theta_b[k]
